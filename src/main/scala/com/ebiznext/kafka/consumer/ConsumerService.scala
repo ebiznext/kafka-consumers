@@ -3,7 +3,7 @@ package com.ebiznext.kafka.consumer
 import java.util
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, KafkaConsumer, OffsetAndMetadata, OffsetCommitCallback}
+import org.apache.kafka.clients.consumer._
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.WakeupException
 
@@ -17,7 +17,7 @@ trait ConsumerService[K,V] extends LazyLogging{
   def consumer: KafkaConsumer[K, V]
   def topics: List[String]
 
-  def handler: ConsumerHandler[V]
+  def handler: ConsumerHandler[K, V]
 
   def timeout = 100L
 
@@ -64,7 +64,7 @@ trait ConsumerService[K,V] extends LazyLogging{
       while(true){
         val records = consumer.poll(timeout)
         for(record <- records){
-          handler.processMessage(record.value())
+          handler.processRecord(record)
           currentOffsets += new TopicPartition(record.topic(), record.partition()) ->
             new OffsetAndMetadata(record.offset()+1, "no metadata")
           count += 1
@@ -91,6 +91,6 @@ trait ConsumerService[K,V] extends LazyLogging{
   }
 }
 
-trait ConsumerHandler[T] {
-  def processMessage(message: T): Boolean
+trait ConsumerHandler[K,V] {
+  def processRecord(record: ConsumerRecord[K, V]): Unit
 }
