@@ -13,11 +13,11 @@ import scala.util.{Failure, Try}
 /**
   * Created by smanciot on 21/07/17.
   */
-trait ConsumerService[K,V] extends LazyLogging{
-  def consumer: KafkaConsumer[K, V]
+trait ConsumerService[Key, Value] extends LazyLogging{
+  def consumer: KafkaConsumer[Key, Value]
   def topics: List[String]
 
-  def handler: ConsumerHandler[K, V]
+  def handler: ConsumerHandler[Key, Value]
 
   def timeout = 100L
 
@@ -91,6 +91,6 @@ trait ConsumerService[K,V] extends LazyLogging{
   }
 }
 
-trait ConsumerHandler[K,V] {
-  def processRecord(record: ConsumerRecord[K, V]): Unit
+trait ConsumerHandler[Key, Value] {
+  def processRecord(record: ConsumerRecord[Key, Value]): Unit
 }
